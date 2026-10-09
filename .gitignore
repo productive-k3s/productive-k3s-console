@@ -3,6 +3,8 @@ dist/
 test-artifacts/
 coverage/
 .venv/
+__pycache__/
+*.py[cod]
 docs/.venv/
 docs/site/
 docs/.mkdocs.pid
