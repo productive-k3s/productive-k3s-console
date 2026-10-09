@@ -1,0 +1,101 @@
+apiVersion: materials.productive-k3s.io/v1alpha1
+kind: MaterialsLock
+metadata:
+  owner: productive-k3s-console
+  package: pk3s-console
+  version: 0.1.0-dev
+spec:
+  materials:
+    - id: pk3s-cli
+      type: product-artifact
+      name: productive-k3s-cli
+      version: 1.0.0-dev.ee5fa5f
+      source: https://github.com/productive-k3s/productive-k3s-cli
+      pinPolicy: exact
+      required: true
+      sourceRevision: ee5fa5f213801d2da707d032f7702ddf59ba8845
+    - id: wetty
+      type: binary
+      name: wetty
+      version: 4.0.0
+      source: https://www.npmjs.com/package/wetty
+      pinPolicy: exact-lock
+      required: true
+      integrity: sha512-rUItIOO7Iz1pzH1tJqK3JP/Cj9h2IMRDniuUrgMxfnD5SfDa1FAp2KHGPBCFXpHUXa+8geK89ZGuGa8wCy6oNg==
+      updateSource:
+        type: github-release
+        repository: butlerx/wetty
+    - id: k9s
+      type: binary
+      name: k9s
+      version: v0.51.0
+      source: https://github.com/derailed/k9s
+      pinPolicy: exact-checksum
+      required: true
+      checksums:
+        linux-amd64: sha256:c3752ad51a5a4015a113819c4eeb6e55a4d0e4b8e652494797532f6fc8161dd7
+        linux-arm64: sha256:3ee05c82e5f9198928a4e86133608ba6a2c10a2244d6a7789e820f78319d640c
+      updateSource:
+        type: github-release
+        repository: derailed/k9s
+    - id: kubectl
+      type: binary
+      name: kubectl
+      version: v1.35.5
+      source: https://dl.k8s.io
+      pinPolicy: exact-checksum
+      required: true
+      checksums:
+        linux-amd64: sha256:90f75ea6ecc9ea5633262e1c0b83a40560003b30fc94a04cb099404fcef0c224
+        linux-arm64: sha256:ac69e06fd6860d69786692f5af1c3a1208ed54f8366a4d97ab15c172e99765ee
+      updateSource:
+        type: github-release
+        repository: kubernetes/kubernetes
+    - id: helm
+      type: binary
+      name: helm
+      version: v3.21.0
+      source: https://github.com/helm/helm
+      pinPolicy: exact-checksum
+      required: true
+      checksums:
+        linux-amd64: sha256:0093eb572e3d2380f094df162ddb525e219249de88957afe24cfbb19632acd36
+        linux-arm64: sha256:8de5a0c9a47431e59fd560e91e0779c8cf9316c383da7efb84128a4c339ecb2d
+      updateSource:
+        type: github-release
+        repository: helm/helm
+    - id: node-runtime
+      type: container-image
+      name: node
+      version: 22.20.0-bookworm-slim
+      source: docker.io/library/node
+      pinPolicy: exact-digest
+      required: true
+      digest: sha256:b21fe589dfbe5cc39365d0544b9be3f1f33f55f3c86c87a76ff65a02f8f5848e
+    - id: go-builder
+      type: container-image
+      name: golang
+      version: 1.24.2-bookworm
+      source: docker.io/library/golang
+      pinPolicy: exact-digest
+      required: true
+      digest: sha256:79390b5e5af9ee6e7b1173ee3eac7fadf6751a545297672916b59bfa0ecf6f71
+    - id: oauth2-proxy
+      type: container-image
+      name: oauth2-proxy
+      version: v7.15.5
+      source: quay.io/oauth2-proxy/oauth2-proxy
+      pinPolicy: exact-digest
+      required: true
+      digest: sha256:8498b0d0ef0a7b29686414000a08aee467f02d0299c9ed1e006a8f33fc017916
+      updateSource:
+        type: github-release
+        repository: oauth2-proxy/oauth2-proxy
+  requirements:
+    - id: docker-compose
+      type: binary
+      name: Docker Compose
+      version: 2.20.0
+      source: https://github.com/docker/compose
+      pinPolicy: minimum-supported
+      required: true

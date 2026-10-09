@@ -1,0 +1,10 @@
+{
+  "name": "productive-k3s-console-runtime",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Locked WeTTY runtime for Productive K3S Console",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "wetty": "4.0.0"
+  }
+}

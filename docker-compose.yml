@@ -1,0 +1,88 @@
+name: productive-k3s-console
+
+services:
+  console:
+    image: ${PK3S_CONSOLE_IMAGE:-productive-k3s-console:dev}
+    build:
+      context: .
+      dockerfile: console/Dockerfile
+    environment:
+      ALLOWEDORIGINS: ${PK3S_CONSOLE_PUBLIC_ORIGIN:?set PK3S_CONSOLE_PUBLIC_ORIGIN}
+      HOME: /home/pk3s
+      TERM: xterm-256color
+    expose:
+      - "3000"
+    volumes:
+      - pk3s-state:/home/pk3s/.pk3s
+      - kube-state:/home/pk3s/.kube
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - console-internal
+
+  auth:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.5@sha256:8498b0d0ef0a7b29686414000a08aee467f02d0299c9ed1e006a8f33fc017916
+    depends_on:
+      console:
+        condition: service_healthy
+    environment:
+      OAUTH2_PROXY_PROVIDER: oidc
+      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:?set OIDC_ISSUER_URL}
+      OAUTH2_PROXY_CLIENT_ID: ${OIDC_CLIENT_ID:?set OIDC_CLIENT_ID}
+      OAUTH2_PROXY_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:?set OIDC_CLIENT_SECRET}
+      OAUTH2_PROXY_REDIRECT_URL: ${OIDC_REDIRECT_URL:?set OIDC_REDIRECT_URL}
+      OAUTH2_PROXY_COOKIE_SECRET: ${OIDC_COOKIE_SECRET:?set OIDC_COOKIE_SECRET}
+      OAUTH2_PROXY_EMAIL_DOMAINS: ${OIDC_ALLOWED_EMAIL_DOMAINS:?set OIDC_ALLOWED_EMAIL_DOMAINS}
+      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
+      OAUTH2_PROXY_UPSTREAMS: http://console:3000
+      OAUTH2_PROXY_COOKIE_SECURE: ${OIDC_COOKIE_SECURE:-true}
+      OAUTH2_PROXY_COOKIE_HTTPONLY: "true"
+      OAUTH2_PROXY_COOKIE_SAMESITE: lax
+      OAUTH2_PROXY_CODE_CHALLENGE_METHOD: S256
+      OAUTH2_PROXY_REVERSE_PROXY: "true"
+      OAUTH2_PROXY_PASS_ACCESS_TOKEN: "false"
+      OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER: "false"
+      OAUTH2_PROXY_SET_AUTHORIZATION_HEADER: "false"
+    ports:
+      - "${PK3S_CONSOLE_PORT:-3000}:4180"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - console-internal
+      - console-edge
+
+volumes:
+  pk3s-state:
+  kube-state:
+
+networks:
+  console-internal:
+    internal: true
+  console-edge:

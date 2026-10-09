@@ -1,0 +1,54 @@
+name: Release Image
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out Console
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate release source
+        run: make test-local-all docs-build
+
+      - name: Resolve immutable image references
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            printf 'Invalid Console release tag: %s\n' "${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+          printf 'IMAGE_VERSION=ghcr.io/productive-k3s/pk3s-console:%s\n' "${version}" >> "${GITHUB_ENV}"
+          printf 'IMAGE_COMMIT=ghcr.io/productive-k3s/pk3s-console:sha-%s\n' "${GITHUB_SHA}" >> "${GITHUB_ENV}"
+
+      - name: Build immutable image
+        run: |
+          make build IMAGE="${IMAGE_VERSION}"
+          docker tag "${IMAGE_VERSION}" "${IMAGE_COMMIT}"
+
+      - name: Publish immutable images
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io --username "${GITHUB_ACTOR}" --password-stdin
+          docker push "${IMAGE_VERSION}"
+          docker push "${IMAGE_COMMIT}"

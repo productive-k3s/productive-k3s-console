@@ -1,0 +1,11 @@
+.env
+dist/
+test-artifacts/
+coverage/
+.venv/
+docs/.venv/
+docs/site/
+docs/.mkdocs.pid
+docs/.mkdocs.log
+.DS_Store
+*.log
