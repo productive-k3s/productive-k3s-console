@@ -1,21 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-ARG GO_IMAGE=golang:1.24.2-bookworm@sha256:79390b5e5af9ee6e7b1173ee3eac7fadf6751a545297672916b59bfa0ecf6f71
 ARG NODE_IMAGE=node:22.20.0-bookworm-slim@sha256:b21fe589dfbe5cc39365d0544b9be3f1f33f55f3c86c87a76ff65a02f8f5848e
-
-FROM ${GO_IMAGE} AS cli-builder
-ARG TARGETARCH
-ARG PK3S_CLI_SOURCE_REVISION=ee5fa5f213801d2da707d032f7702ddf59ba8845
-ARG PK3S_CLI_VERSION=1.0.0-dev.ee5fa5f
-WORKDIR /src
-RUN git init . \
-    && git remote add origin https://github.com/productive-k3s/productive-k3s-cli.git \
-    && git fetch --depth=1 origin "${PK3S_CLI_SOURCE_REVISION}" \
-    && git checkout --detach FETCH_HEAD \
-    && test "$(git rev-parse HEAD)" = "${PK3S_CLI_SOURCE_REVISION}"
-RUN CGO_ENABLED=0 GOOS=linux GOARCH="${TARGETARCH}" go build \
-    -ldflags "-s -w -X github.com/productive-k3s/productive-k3s-cli/internal/app.Version=${PK3S_CLI_VERSION}" \
-    -o /out/pk3s .
 
 FROM ${NODE_IMAGE} AS wetty-builder
 WORKDIR /opt/console
@@ -28,6 +13,9 @@ RUN npm ci --omit=dev --ignore-scripts=false --no-audit --no-fund \
 
 FROM ${NODE_IMAGE} AS tool-downloader
 ARG TARGETARCH
+ARG PK3S_CLI_VERSION=0.9.65
+ARG PK3S_CLI_SHA256_AMD64=dae5106ef28fc2ffdfb6c2ef6454c2a2d0e0799365a7291287778f730caa2096
+ARG PK3S_CLI_SHA256_ARM64=14d5dce44c00b481f70366cd2655b388e75c75544837a45cf1b7dddcb2111745
 ARG KUBECTL_VERSION=v1.35.5
 ARG KUBECTL_SHA256_AMD64=90f75ea6ecc9ea5633262e1c0b83a40560003b30fc94a04cb099404fcef0c224
 ARG KUBECTL_SHA256_ARM64=ac69e06fd6860d69786692f5af1c3a1208ed54f8366a4d97ab15c172e99765ee
@@ -42,10 +30,13 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl \
     && rm -rf /var/lib/apt/lists/* \
     && case "${TARGETARCH}" in \
-         amd64) kubectl_sha="${KUBECTL_SHA256_AMD64}"; helm_sha="${HELM_SHA256_AMD64}"; k9s_sha="${K9S_SHA256_AMD64}" ;; \
-         arm64) kubectl_sha="${KUBECTL_SHA256_ARM64}"; helm_sha="${HELM_SHA256_ARM64}"; k9s_sha="${K9S_SHA256_ARM64}" ;; \
+         amd64) pk3s_sha="${PK3S_CLI_SHA256_AMD64}"; kubectl_sha="${KUBECTL_SHA256_AMD64}"; helm_sha="${HELM_SHA256_AMD64}"; k9s_sha="${K9S_SHA256_AMD64}" ;; \
+         arm64) pk3s_sha="${PK3S_CLI_SHA256_ARM64}"; kubectl_sha="${KUBECTL_SHA256_ARM64}"; helm_sha="${HELM_SHA256_ARM64}"; k9s_sha="${K9S_SHA256_ARM64}" ;; \
          *) echo "Unsupported architecture: ${TARGETARCH}" >&2; exit 1 ;; \
        esac \
+    && curl -fsSLo pk3s.tgz "https://github.com/productive-k3s/productive-k3s-cli/releases/download/${PK3S_CLI_VERSION}/pk3s-${PK3S_CLI_VERSION}-linux-${TARGETARCH}.tar.gz" \
+    && echo "${pk3s_sha}  pk3s.tgz" | sha256sum -c - \
+    && tar -xzf pk3s.tgz pk3s \
     && curl -fsSLo kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl" \
     && echo "${kubectl_sha}  kubectl" | sha256sum -c - \
     && curl -fsSLo helm.tgz "https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz" \
@@ -55,11 +46,11 @@ RUN apt-get update \
     && curl -fsSLo k9s.tgz "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_${TARGETARCH}.tar.gz" \
     && echo "${k9s_sha}  k9s.tgz" | sha256sum -c - \
     && tar -xzf k9s.tgz k9s \
-    && chmod 0755 kubectl helm k9s
+    && chmod 0755 pk3s kubectl helm k9s
 
 FROM ${NODE_IMAGE}
 ARG PK3S_CONSOLE_VERSION=0.1.0-dev
-ARG PK3S_CLI_VERSION=1.0.0-dev.ee5fa5f
+ARG PK3S_CLI_VERSION=0.9.65
 ARG WETTY_VERSION=4.0.0
 ARG K9S_VERSION=v0.51.0
 ARG KUBECTL_VERSION=v1.35.5
@@ -80,7 +71,7 @@ RUN apt-get update \
 WORKDIR /opt/console
 COPY --from=wetty-builder /opt/console/node_modules ./node_modules
 COPY --from=wetty-builder /opt/console/package.json /opt/console/package-lock.json ./
-COPY --from=cli-builder /out/pk3s /usr/local/bin/pk3s
+COPY --from=tool-downloader /downloads/pk3s /usr/local/bin/pk3s
 COPY --from=tool-downloader /downloads/kubectl /usr/local/bin/kubectl
 COPY --from=tool-downloader /downloads/helm /usr/local/bin/helm
 COPY --from=tool-downloader /downloads/k9s /usr/local/bin/k9s

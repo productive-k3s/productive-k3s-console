@@ -9,11 +9,23 @@ spec:
     - id: pk3s-cli
       type: product-artifact
       name: productive-k3s-cli
-      version: 1.0.0-dev.ee5fa5f
-      source: https://github.com/productive-k3s/productive-k3s-cli
-      pinPolicy: exact
+      version: 0.9.65
+      source: https://github.com/productive-k3s/productive-k3s-cli/releases/tag/0.9.65
+      pinPolicy: exact-checksum
       required: true
-      sourceRevision: ee5fa5f213801d2da707d032f7702ddf59ba8845
+      sourceRevision: 54f33119b0fb13119f1092f1a50723ae72142cd4
+      checksums:
+        linux-amd64: sha256:dae5106ef28fc2ffdfb6c2ef6454c2a2d0e0799365a7291287778f730caa2096
+        linux-arm64: sha256:14d5dce44c00b481f70366cd2655b388e75c75544837a45cf1b7dddcb2111745
+      compatibility:
+        core: 0.9.6
+        infra: 0.9.65-0.9.6
+        catalog:
+          version: 0.9.65
+          sha256: 0e19b5abc132f8fbaabe32f09da8b18fb2c556ce0a4f1b88ad4bb7d1852906b7
+      updateSource:
+        type: github-release
+        repository: productive-k3s/productive-k3s-cli
     - id: wetty
       type: binary
       name: wetty
@@ -72,14 +84,6 @@ spec:
       pinPolicy: exact-digest
       required: true
       digest: sha256:b21fe589dfbe5cc39365d0544b9be3f1f33f55f3c86c87a76ff65a02f8f5848e
-    - id: go-builder
-      type: container-image
-      name: golang
-      version: 1.24.2-bookworm
-      source: docker.io/library/golang
-      pinPolicy: exact-digest
-      required: true
-      digest: sha256:79390b5e5af9ee6e7b1173ee3eac7fadf6751a545297672916b59bfa0ecf6f71
     - id: oauth2-proxy
       type: container-image
       name: oauth2-proxy

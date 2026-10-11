@@ -29,6 +29,21 @@ curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null
 for tool in pk3s kubectl helm k9s; do
   PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console test -x "/usr/local/bin/${tool}"
 done
+assert_version() {
+  local tool="$1"
+  local expected="$2"
+  shift 2
+  local output
+  output="$(PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console "$@" 2>&1)"
+  if [[ "${output}" != *"${expected}"* ]]; then
+    printf 'ERROR: %s did not report locked version %s. Output: %s\n' "${tool}" "${expected}" "${output}" >&2
+    return 1
+  fi
+}
+assert_version pk3s 0.9.65 pk3s version
+assert_version kubectl v1.35.5 kubectl version --client
+assert_version helm v3.21.0 helm version --short
+assert_version k9s v0.51.0 k9s version --short
 # The command substitution must run inside the container's shell.
 # shellcheck disable=SC2016
 PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \

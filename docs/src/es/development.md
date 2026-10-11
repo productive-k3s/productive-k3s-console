@@ -30,5 +30,7 @@ sincronizadas se versionan y Ops valida el drift con
 `make docs-theme-drift-check`.
 
 Las versiones viven en `materials.lock.yaml`, argumentos del Docker build y
-`package-lock.json`. Se actualizan juntas y `make bom` regenera el BOM resuelto
-no versionado.
+`package-lock.json`. El build de Docker descarga el archivo publicado del CLI
+PK3S para la arquitectura objetivo y verifica su checksum antes de extraerlo;
+Console nunca recompila CLI desde un branch o revision fuente. Esos inputs se
+actualizan juntos y `make bom` regenera el BOM resuelto no versionado.

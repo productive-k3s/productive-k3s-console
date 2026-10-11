@@ -11,10 +11,10 @@ Browser -> oauth2-proxy -> WeTTY -> pk3s -> k9s -> Kubernetes
 
 ## Status
 
-This is the first V1 implementation. It uses an immutable CLI source revision
-while the first compatible CLI release is being validated. A production image
-release remains blocked until that revision is available as an immutable CLI
-release asset and the P1 compatibility gate is closed.
+This is the first V1 implementation. It consumes the checksum-verified PK3S
+CLI `0.9.65` release for Linux AMD64 and ARM64. That CLI release fixes Core
+`0.9.6`, Infra `0.9.65-0.9.6`, and immutable Catalog `0.9.65`; the complete
+matrix passed the Ops isolated validation gate before Console adopted it.
 
 ## Quick Start
 

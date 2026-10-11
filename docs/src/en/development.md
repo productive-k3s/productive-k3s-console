@@ -30,5 +30,8 @@ theme copies and validate workspace drift from Ops with
 `make docs-theme-drift-check`.
 
 Dependency versions live in `materials.lock.yaml`, Docker build arguments, and
-`package-lock.json`. Update them together and regenerate the untracked resolved
-BOM with `make bom`.
+`package-lock.json`. The Docker build downloads the released PK3S CLI archive
+for its target architecture and verifies the checksum from the lock before
+extracting it; Console never rebuilds CLI from a branch or source revision.
+Update these inputs together and regenerate the untracked resolved BOM with
+`make bom`.

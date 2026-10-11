@@ -19,6 +19,29 @@ class MaterialsTests(unittest.TestCase):
     def test_repository_lock_is_valid(self) -> None:
         self.assertEqual(materials.validate_lock(self.lock), [])
 
+    def test_cli_release_and_compatibility_are_locked(self) -> None:
+        cli = next(item for item in self.lock["spec"]["materials"] if item["id"] == "pk3s-cli")
+        self.assertEqual(cli["version"], "0.9.65")
+        self.assertEqual(cli["pinPolicy"], "exact-checksum")
+        self.assertEqual(
+            cli["sourceRevision"],
+            "54f33119b0fb13119f1092f1a50723ae72142cd4",
+        )
+        self.assertEqual(
+            cli["checksums"],
+            {
+                "linux-amd64": "sha256:dae5106ef28fc2ffdfb6c2ef6454c2a2d0e0799365a7291287778f730caa2096",
+                "linux-arm64": "sha256:14d5dce44c00b481f70366cd2655b388e75c75544837a45cf1b7dddcb2111745",
+            },
+        )
+        self.assertEqual(cli["compatibility"]["core"], "0.9.6")
+        self.assertEqual(cli["compatibility"]["infra"], "0.9.65-0.9.6")
+        self.assertEqual(cli["compatibility"]["catalog"]["version"], "0.9.65")
+        self.assertEqual(
+            cli["compatibility"]["catalog"]["sha256"],
+            "0e19b5abc132f8fbaabe32f09da8b18fb2c556ce0a4f1b88ad4bb7d1852906b7",
+        )
+
     def test_validation_reports_contract_failures(self) -> None:
         payload = {"apiVersion": "wrong", "kind": "Wrong", "metadata": {}, "spec": {"materials": "bad"}}
         errors = materials.validate_lock(payload)
@@ -57,7 +80,7 @@ class MaterialsTests(unittest.TestCase):
             bom = materials.render_bom(self.lock, self.raw, "abc123")
         self.assertEqual(bom["generatedAt"], "1970-01-01T00:00:00Z")
         self.assertEqual(bom["sourceRevision"], "abc123")
-        self.assertEqual(len(bom["materials"]), 8)
+        self.assertEqual(len(bom["materials"]), 7)
 
     def test_load_lock_rejects_non_object(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
