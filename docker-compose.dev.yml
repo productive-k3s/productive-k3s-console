@@ -1,0 +1,7 @@
+services:
+  console:
+    ports:
+      - "127.0.0.1:${PK3S_CONSOLE_PORT:-3000}:3000"
+    networks:
+      - console-internal
+      - console-edge

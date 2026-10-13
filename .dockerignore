@@ -1,0 +1,10 @@
+.git
+.github
+.env
+dist/*
+!dist/bom.json
+test-artifacts
+docs
+tests
+*.md
+!LICENSE

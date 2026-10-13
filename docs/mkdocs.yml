@@ -1,0 +1,84 @@
+site_name: Productive K3S Console
+site_description: Browser-hosted Productive K3S CLI and TUI with an authenticated deployment boundary.
+site_author: Productive K3S Console
+repo_url: https://github.com/productive-k3s/productive-k3s-console
+repo_name: GitHub
+edit_uri: edit/main/docs/src/
+docs_dir: src
+site_dir: site
+
+theme:
+  name: material
+  custom_dir: src/overrides
+  language: en
+  favicon: assets/images/favicon.ico
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.path
+    - navigation.sections
+    - navigation.expand
+    - navigation.footer
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: white
+      accent: blue
+  font: false
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      title: On this page
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - English:
+      - Overview: en/index.md
+      - Architecture: en/architecture.md
+      - Authentication: en/authentication.md
+      - Deployment and state: en/deployment.md
+      - Development and tests: en/development.md
+      - Release: en/release.md
+  - Espanol:
+      - Descripcion: es/index.md
+      - Arquitectura: es/architecture.md
+      - Autenticacion: es/authentication.md
+      - Despliegue y estado: es/deployment.md
+      - Desarrollo y pruebas: es/development.md
+      - Release: es/release.md
+
+extra:
+  pk3s:
+    footer_slogan_en: "Operate Productive K3S from the browser through the existing CLI and TUI contract."
+    footer_slogan_es: "Opera Productive K3S desde el navegador a traves del contrato existente del CLI y la TUI."
+    contact_label_en: "Contact"
+    contact_label_es: "Contacto"
+    newsletter_label_en: "Newsletter"
+    newsletter_label_es: "Newsletter"
+    newsletter_placeholder_en: "E-mail"
+    newsletter_placeholder_es: "E-mail"
+    newsletter_turnstile_site_key: !ENV [NEWSLETTER_TURNSTILE_SITE_KEY, ""]
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/productive-k3s/productive-k3s-console
