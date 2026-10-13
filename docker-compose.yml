@@ -9,12 +9,15 @@ services:
     environment:
       ALLOWEDORIGINS: ${PK3S_CONSOLE_PUBLIC_ORIGIN:?set PK3S_CONSOLE_PUBLIC_ORIGIN}
       HOME: /home/pk3s
+      PK3S_RUNTIME_DISABLED_SCENARIOS: multipass
       TERM: xterm-256color
     expose:
       - "3000"
     volumes:
+      - cache-state:/home/pk3s/.cache
       - pk3s-state:/home/pk3s/.pk3s
       - kube-state:/home/pk3s/.kube
+      - ssh-state:/home/pk3s/.ssh
     healthcheck:
       test:
         - CMD
@@ -79,8 +82,10 @@ services:
       - console-edge
 
 volumes:
+  cache-state:
   pk3s-state:
   kube-state:
+  ssh-state:
 
 networks:
   console-internal:

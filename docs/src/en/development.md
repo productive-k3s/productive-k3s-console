@@ -22,7 +22,14 @@ persistent state, and removes its containers and volumes.
 `AUTH_MODE` defaults to `oidc`. Setting it to `disabled` selects the separate
 development Compose override, starts only `console`, uses `.env.example`, and
 publishes WeTTY exclusively on `127.0.0.1`. Any other value is rejected by the
-Makefile. Use the same mode for `up`, `down`, and `logs`.
+Makefile. Open `http://localhost:3000`, which matches the configured browser
+origin, and use the same mode for `up`, `down`, and `logs`.
+
+The development container persists `.cache`, `.pk3s`, `.kube`, and `.ssh`.
+Multipass Profiles are rejected by runtime policy because the container is not
+connected to the host Multipass daemon. Cloud and remote-host Profiles use the
+same pinned tools as production. Test credentials belong only in the SSH
+volume and must never be committed.
 
 Documentation consumes the shared theme submodule. Both `docs-build` and
 `docs-up` run `docs/sync-shared-theme.sh` before MkDocs. Commit synchronized

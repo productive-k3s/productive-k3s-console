@@ -36,12 +36,13 @@ jobs:
             printf 'Invalid Console release tag: %s\n' "${GITHUB_REF_NAME}" >&2
             exit 1
           fi
+          printf 'CONSOLE_VERSION=%s\n' "${version}" >> "${GITHUB_ENV}"
           printf 'IMAGE_VERSION=ghcr.io/productive-k3s/pk3s-console:%s\n' "${version}" >> "${GITHUB_ENV}"
           printf 'IMAGE_COMMIT=ghcr.io/productive-k3s/pk3s-console:sha-%s\n' "${GITHUB_SHA}" >> "${GITHUB_ENV}"
 
-      - name: Build immutable image
+      - name: Build and smoke-test immutable image
         run: |
-          make build IMAGE="${IMAGE_VERSION}"
+          make smoke IMAGE="${IMAGE_VERSION}" VERSION="${CONSOLE_VERSION}"
           docker tag "${IMAGE_VERSION}" "${IMAGE_COMMIT}"
 
       - name: Publish immutable images

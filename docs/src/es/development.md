@@ -22,7 +22,14 @@ estado persistente, y luego elimina contenedores y volumenes.
 `AUTH_MODE` usa `oidc` por defecto. El valor `disabled` selecciona el override
 Compose de desarrollo, inicia solamente `console`, usa `.env.example` y
 publica WeTTY exclusivamente en `127.0.0.1`. El Makefile rechaza cualquier
-otro valor. Usa el mismo modo para `up`, `down` y `logs`.
+otro valor. Abri `http://localhost:3000`, que coincide con el origen configurado,
+y usa el mismo modo para `up`, `down` y `logs`.
+
+El contenedor de desarrollo persiste `.cache`, `.pk3s`, `.kube` y `.ssh`. Los
+Profiles de Multipass se rechazan por politica de runtime porque el contenedor
+no esta conectado al daemon Multipass del host. Los Profiles cloud y
+remote-host usan las mismas herramientas pineadas que produccion. Las
+credenciales de prueba solo pertenecen al volumen SSH y nunca se versionan.
 
 La documentacion consume el submodulo del theme compartido. `docs-build` y
 `docs-up` ejecutan `docs/sync-shared-theme.sh` antes de MkDocs. Las copias

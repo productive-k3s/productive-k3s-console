@@ -9,23 +9,73 @@ spec:
     - id: pk3s-cli
       type: product-artifact
       name: productive-k3s-cli
-      version: 0.9.65
-      source: https://github.com/productive-k3s/productive-k3s-cli/releases/tag/0.9.65
+      version: 0.9.69
+      source: https://github.com/productive-k3s/productive-k3s-cli/releases/tag/0.9.69
       pinPolicy: exact-checksum
       required: true
-      sourceRevision: 54f33119b0fb13119f1092f1a50723ae72142cd4
+      sourceRevision: f40dcc123015e2b1c8600b50fb70549f2771d058
       checksums:
-        linux-amd64: sha256:dae5106ef28fc2ffdfb6c2ef6454c2a2d0e0799365a7291287778f730caa2096
-        linux-arm64: sha256:14d5dce44c00b481f70366cd2655b388e75c75544837a45cf1b7dddcb2111745
+        linux-amd64: sha256:7b5cc23392dd0f17e343a507697ff879daf9aa5245c80ac0e6eea30633400dca
+        linux-arm64: sha256:31e1c5332da241c76247738f325d11e04b381d057ab2030cb19d46b0fd12aac2
       compatibility:
         core: 0.9.6
-        infra: 0.9.65-0.9.6
+        infra: 0.9.66-0.9.6
         catalog:
-          version: 0.9.65
-          sha256: 0e19b5abc132f8fbaabe32f09da8b18fb2c556ce0a4f1b88ad4bb7d1852906b7
+          version: 0.9.66
+          sha256: c792efb58db68aec37a2c23451045451ed17c64843dfbe268b00360d70f4057b
       updateSource:
         type: github-release
         repository: productive-k3s/productive-k3s-cli
+    - id: opentofu
+      type: binary
+      name: opentofu
+      version: 1.12.6
+      source: https://github.com/opentofu/opentofu
+      pinPolicy: exact-checksum
+      required: true
+      checksums:
+        linux-amd64: sha256:5dc43da4f750f33873dc25e94587128709e819e544b7be9016b255316153c3a8
+        linux-arm64: sha256:e573979ba68a17fe7b881752051a694a7efcd970e39521f6a25775197861ed4d
+      updateSource:
+        type: github-release
+        repository: opentofu/opentofu
+    - id: ansible-core
+      type: binary
+      name: ansible-core
+      version: 2.15.13
+      source: https://pypi.org/project/ansible-core/
+      pinPolicy: exact-checksum
+      required: true
+      checksums:
+        py3-none-any: sha256:e7f50bbb61beae792f5ecb86eff82149d3948d078361d70aedb01d76bc483c30
+    - id: jq
+      type: os-package
+      name: jq
+      version: 1.6-2.1+deb12u2
+      source: https://packages.debian.org/bookworm/jq
+      pinPolicy: exact-package
+      required: true
+    - id: openssh-client
+      type: os-package
+      name: openssh-client
+      version: 1:9.2p1-2+deb12u10
+      source: https://packages.debian.org/bookworm/openssh-client
+      pinPolicy: exact-package
+      required: true
+    - id: python-runtime
+      type: os-package
+      name: python3
+      version: 3.11.2-1+b1
+      source: https://packages.debian.org/bookworm/python3
+      pinPolicy: exact-package
+      required: true
+    - id: curl
+      type: os-package
+      name: curl
+      version: 7.88.1-10+deb12u15
+      source: https://packages.debian.org/bookworm/curl
+      pinPolicy: exact-package
+      required: true
     - id: wetty
       type: binary
       name: wetty

@@ -5,6 +5,7 @@ SHELL := /usr/bin/env bash
 	docs-build docs-serve docs-up docs-down docs-clean
 
 IMAGE ?= productive-k3s-console:dev
+VERSION ?= 0.1.0-dev
 AUTH_MODE ?= oidc
 
 ifeq ($(AUTH_MODE),oidc)
@@ -43,7 +44,7 @@ help:
 		'  make test-logs-clean Remove repository-local test output'
 
 build:
-	IMAGE="$(IMAGE)" bash scripts/build.sh
+	IMAGE="$(IMAGE)" VERSION="$(VERSION)" bash scripts/build.sh
 
 validate:
 	bash scripts/validate.sh
@@ -61,7 +62,7 @@ test-coverage:
 	bash tests/test-coverage.sh
 
 smoke:
-	IMAGE="$(IMAGE)" bash scripts/smoke.sh
+	IMAGE="$(IMAGE)" VERSION="$(VERSION)" bash scripts/smoke.sh
 
 up:
 	$(COMPOSE) up -d --build $(COMPOSE_SERVICES)

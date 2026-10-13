@@ -21,26 +21,37 @@ class MaterialsTests(unittest.TestCase):
 
     def test_cli_release_and_compatibility_are_locked(self) -> None:
         cli = next(item for item in self.lock["spec"]["materials"] if item["id"] == "pk3s-cli")
-        self.assertEqual(cli["version"], "0.9.65")
+        self.assertEqual(cli["version"], "0.9.69")
         self.assertEqual(cli["pinPolicy"], "exact-checksum")
         self.assertEqual(
             cli["sourceRevision"],
-            "54f33119b0fb13119f1092f1a50723ae72142cd4",
+            "f40dcc123015e2b1c8600b50fb70549f2771d058",
         )
         self.assertEqual(
             cli["checksums"],
             {
-                "linux-amd64": "sha256:dae5106ef28fc2ffdfb6c2ef6454c2a2d0e0799365a7291287778f730caa2096",
-                "linux-arm64": "sha256:14d5dce44c00b481f70366cd2655b388e75c75544837a45cf1b7dddcb2111745",
+                "linux-amd64": "sha256:7b5cc23392dd0f17e343a507697ff879daf9aa5245c80ac0e6eea30633400dca",
+                "linux-arm64": "sha256:31e1c5332da241c76247738f325d11e04b381d057ab2030cb19d46b0fd12aac2",
             },
         )
         self.assertEqual(cli["compatibility"]["core"], "0.9.6")
-        self.assertEqual(cli["compatibility"]["infra"], "0.9.65-0.9.6")
-        self.assertEqual(cli["compatibility"]["catalog"]["version"], "0.9.65")
+        self.assertEqual(cli["compatibility"]["infra"], "0.9.66-0.9.6")
+        self.assertEqual(cli["compatibility"]["catalog"]["version"], "0.9.66")
         self.assertEqual(
             cli["compatibility"]["catalog"]["sha256"],
-            "0e19b5abc132f8fbaabe32f09da8b18fb2c556ce0a4f1b88ad4bb7d1852906b7",
+            "c792efb58db68aec37a2c23451045451ed17c64843dfbe268b00360d70f4057b",
         )
+
+    def test_profile_runtime_toolchain_is_locked(self) -> None:
+        locked = {item["id"]: item for item in self.lock["spec"]["materials"]}
+        self.assertEqual(locked["opentofu"]["version"], "1.12.6")
+        self.assertEqual(locked["opentofu"]["pinPolicy"], "exact-checksum")
+        self.assertEqual(locked["ansible-core"]["version"], "2.15.13")
+        self.assertEqual(locked["ansible-core"]["pinPolicy"], "exact-checksum")
+        self.assertEqual(locked["jq"]["version"], "1.6-2.1+deb12u2")
+        self.assertEqual(locked["openssh-client"]["version"], "1:9.2p1-2+deb12u10")
+        self.assertEqual(locked["python-runtime"]["version"], "3.11.2-1+b1")
+        self.assertEqual(locked["curl"]["version"], "7.88.1-10+deb12u15")
 
     def test_validation_reports_contract_failures(self) -> None:
         payload = {"apiVersion": "wrong", "kind": "Wrong", "metadata": {}, "spec": {"materials": "bad"}}
@@ -80,7 +91,7 @@ class MaterialsTests(unittest.TestCase):
             bom = materials.render_bom(self.lock, self.raw, "abc123")
         self.assertEqual(bom["generatedAt"], "1970-01-01T00:00:00Z")
         self.assertEqual(bom["sourceRevision"], "abc123")
-        self.assertEqual(len(bom["materials"]), 7)
+        self.assertEqual(len(bom["materials"]), 13)
 
     def test_load_lock_rejects_non_object(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
