@@ -17,7 +17,8 @@ make test-logs-clean
 
 `test-local-all` no inicia contenedores. `smoke` es explicito porque construye
 la imagen, inicia una instancia limitada a loopback, valida herramientas y
-estado persistente, y luego elimina contenedores y volumenes.
+estado persistente, ejercita el selector fijo y el workspace Config confinado
+con Landlock usando datos sinteticos, y luego elimina contenedores y volumenes.
 
 `AUTH_MODE` usa `oidc` por defecto. El valor `disabled` selecciona el override
 Compose de desarrollo, inicia solamente `console`, usa `.env.example` y
@@ -25,7 +26,10 @@ publica WeTTY exclusivamente en `127.0.0.1`. El Makefile rechaza cualquier
 otro valor. Abri `http://localhost:3000`, que coincide con el origen configurado,
 y usa el mismo modo para `up`, `down` y `logs`.
 
-El contenedor de desarrollo persiste `.cache`, `.pk3s`, `.kube` y `.ssh`. Los
+El contenedor de desarrollo persiste `.cache`, `.pk3s`, `.kube` y `.ssh`.
+Tambien monta el directorio ignorado `PK3S_CONFIG_DIR` en
+`/home/pk3s/config`; prepara esa ruta dedicada para UID/GID `10001:10001`
+antes de ejecutar `make up`. Los
 Profiles de Multipass se rechazan por politica de runtime porque el contenedor
 no esta conectado al daemon Multipass del host. Los Profiles cloud y
 remote-host usan las mismas herramientas pineadas que produccion. Las

@@ -6,6 +6,10 @@ PROJECT="pk3s-console-smoke"
 PORT="${PK3S_CONSOLE_SMOKE_PORT:-13000}"
 IMAGE="${IMAGE:-productive-k3s-console:dev}"
 VERSION="${VERSION:-0.1.0-dev}"
+CONFIG_DIR="${ROOT_DIR}/test-artifacts/config-smoke"
+mkdir -p "${CONFIG_DIR}"
+chmod 0777 "${CONFIG_DIR}"
+export PK3S_CONFIG_DIR="${CONFIG_DIR}"
 COMPOSE=(docker compose --project-name "${PROJECT}" --env-file "${ROOT_DIR}/.env.example" -f "${ROOT_DIR}/docker-compose.yml" -f "${ROOT_DIR}/docker-compose.dev.yml")
 
 cleanup() {
@@ -56,6 +60,43 @@ assert_version jq jq-1.6 jq --version
 PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
   setpriv --reuid=pk3s --regid=pk3s --init-groups sh -c 'test "$(id -u)" = "10001"'
 
+selector_output="$(printf '3\n' | PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console /usr/local/bin/session.sh)"
+for selector_entry in '1. Productive K3S' '2. Config' '3. Exit'; do
+  [[ "${selector_output}" == *"${selector_entry}"* ]]
+done
+
+PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
+  setpriv --reuid=pk3s --regid=pk3s --init-groups \
+  --inh-caps=-all --ambient-caps=-all --bounding-set=-all \
+  /usr/local/bin/config-workspace --verify-sandbox
+
+config_output="$(printf '%s\n' \
+  'mkdir scratchdir' \
+  'rmdir scratchdir' \
+  'edit smoke.env' \
+  'AWS_REGION=us-test-1' \
+  '.save' \
+  'view smoke.env' \
+  'touch disposable' \
+  'rm disposable' \
+  'view ../.ssh/smoke-state' \
+  'view /etc/passwd' \
+  'sh' \
+  'exit' | PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
+    setpriv --reuid=pk3s --regid=pk3s --init-groups \
+    --inh-caps=-all --ambient-caps=-all --bounding-set=-all \
+    /usr/local/bin/config-workspace 2>&1)"
+[[ "${config_output}" == *'Productive K3S Config workspace (uid=10001)'* ]]
+[[ "${config_output}" == *'AWS_REGION=us-test-1'* ]]
+[[ "${config_output}" == *'Parent traversal is not allowed.'* ]]
+[[ "${config_output}" == *'Absolute paths are not allowed.'* ]]
+[[ "${config_output}" == *'Unknown command: sh'* ]]
+PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
+  test "$(PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
+    stat -c '%u:%g:%a' /home/pk3s/config/smoke.env)" = '10001:10001:600'
+PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
+  test ! -e /home/pk3s/config/disposable
+
 PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
   setpriv --reuid=pk3s --regid=pk3s --init-groups sh -c \
   'printf "state survives recreation\n" > /home/pk3s/.pk3s/smoke-state'
@@ -76,5 +117,8 @@ PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
 PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
   setpriv --reuid=pk3s --regid=pk3s --init-groups \
   grep -q 'ssh state survives recreation' /home/pk3s/.ssh/smoke-state
+PK3S_CONSOLE_IMAGE="${IMAGE}" "${COMPOSE[@]}" exec -T console \
+  setpriv --reuid=pk3s --regid=pk3s --init-groups \
+  grep -q 'AWS_REGION=us-test-1' /home/pk3s/config/smoke.env
 
 printf 'Console smoke test passed.\n'

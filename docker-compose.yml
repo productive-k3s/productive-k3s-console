@@ -18,6 +18,11 @@ services:
       - pk3s-state:/home/pk3s/.pk3s
       - kube-state:/home/pk3s/.kube
       - ssh-state:/home/pk3s/.ssh
+      - type: bind
+        source: ${PK3S_CONFIG_DIR:-./config}
+        target: /home/pk3s/config
+        bind:
+          create_host_path: false
     healthcheck:
       test:
         - CMD

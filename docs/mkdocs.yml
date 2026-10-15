@@ -57,6 +57,7 @@ nav:
       - Overview: en/index.md
       - Architecture: en/architecture.md
       - Authentication: en/authentication.md
+      - Configuration workspace: en/configuration.md
       - Deployment and state: en/deployment.md
       - Development and tests: en/development.md
       - Release: en/release.md
@@ -64,6 +65,7 @@ nav:
       - Descripcion: es/index.md
       - Arquitectura: es/architecture.md
       - Autenticacion: es/authentication.md
+      - Workspace de configuracion: es/configuration.md
       - Despliegue y estado: es/deployment.md
       - Desarrollo y pruebas: es/development.md
       - Release: es/release.md
