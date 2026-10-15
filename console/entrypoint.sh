@@ -8,6 +8,12 @@ fi
 
 install -d -m 0700 -o pk3s -g pk3s /home/pk3s/.ssh
 install -d -o pk3s -g pk3s /home/pk3s/.cache /home/pk3s/.pk3s /home/pk3s/.kube
+if ! setpriv --reuid=pk3s --regid=pk3s --init-groups \
+  test -r /home/pk3s/config -a -w /home/pk3s/config -a -x /home/pk3s/config; then
+  printf 'ERROR: PK3S_CONFIG_DIR must be accessible to container UID/GID 10001:10001.\n' >&2
+  printf 'Prepare the dedicated host directory before starting Console; ownership is never changed automatically.\n' >&2
+  exit 1
+fi
 chown pk3s:pk3s /home/pk3s/.ssh
 chown pk3s:pk3s /home/pk3s/.cache /home/pk3s/.pk3s /home/pk3s/.kube
 setpriv --reuid=pk3s --regid=pk3s --init-groups mkdir -p \

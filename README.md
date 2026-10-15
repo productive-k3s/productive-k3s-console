@@ -20,9 +20,10 @@ set. Console verifies the exact CLI archive checksum before installing it.
 ## Quick Start
 
 1. Copy `.env.example` to `.env` and replace every example OIDC value.
-2. Run `make build`.
-3. Run `make up`.
-4. Open `http://localhost:3000`.
+2. Create the dedicated `PK3S_CONFIG_DIR` and assign it to UID/GID `10001:10001`.
+3. Run `make build`.
+4. Run `make up`.
+5. Open `http://localhost:3000`.
 
 The `console` service has no host port. Only `auth` is externally reachable.
 Terminate the application with `make down`.
@@ -58,6 +59,23 @@ must provision keys and `known_hosts` in the dedicated SSH volume at runtime.
 
 No Docker socket, host kubeconfig, SSH server, host Multipass daemon, or
 embedded credentials are used.
+
+## Configuration Workspace
+
+The fixed browser selector offers `Productive K3S`, `Config`, and `Exit`.
+`Config` is a non-root, Landlock-confined file workspace for the ignored host
+path selected through `PK3S_CONFIG_DIR`; it is not a shell and cannot read the
+rest of the image or Console state. Prepare the dedicated directory explicitly:
+
+```bash
+mkdir -p ./config
+sudo chown -R 10001:10001 ./config
+sudo chmod 0700 ./config
+```
+
+Console never changes host ownership automatically. See the bilingual
+configuration workspace documentation for its fixed command set and security
+boundary.
 
 ## Common Commands
 

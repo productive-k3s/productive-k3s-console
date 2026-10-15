@@ -11,6 +11,12 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts=false --no-audit --no-fund \
     && npm cache clean --force
 
+FROM wetty-builder AS config-workspace-builder
+COPY console/config-workspace.c /src/config-workspace.c
+RUN cc -static -std=c11 -O2 -Wall -Wextra -Werror \
+      -o /config-workspace /src/config-workspace.c \
+    && strip /config-workspace
+
 FROM ${NODE_IMAGE} AS tool-downloader
 ARG TARGETARCH
 ARG PK3S_CLI_VERSION=0.9.69
@@ -95,6 +101,7 @@ RUN apt-get update \
     && groupadd --gid 10001 pk3s \
     && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin pk3s \
     && install -d -m 0700 -o pk3s -g pk3s /home/pk3s/.ssh \
+    && install -d -m 0700 -o pk3s -g pk3s /home/pk3s/config \
     && install -d -o pk3s -g pk3s /home/pk3s/.cache /home/pk3s/.pk3s /home/pk3s/.kube /opt/console
 
 WORKDIR /opt/console
@@ -105,11 +112,13 @@ COPY --from=tool-downloader /downloads/tofu /usr/local/bin/tofu
 COPY --from=tool-downloader /downloads/kubectl /usr/local/bin/kubectl
 COPY --from=tool-downloader /downloads/helm /usr/local/bin/helm
 COPY --from=tool-downloader /downloads/k9s /usr/local/bin/k9s
+COPY --from=config-workspace-builder /config-workspace /usr/local/bin/config-workspace
 COPY console/entrypoint.sh console/session.sh /usr/local/bin/
 COPY materials.lock.yaml dist/bom.json /usr/share/productive-k3s-console/
 
 RUN chmod 0755 /usr/local/bin/entrypoint.sh /usr/local/bin/session.sh \
-    /usr/local/bin/pk3s /usr/local/bin/tofu /usr/local/bin/kubectl /usr/local/bin/helm /usr/local/bin/k9s
+    /usr/local/bin/pk3s /usr/local/bin/tofu /usr/local/bin/kubectl /usr/local/bin/helm /usr/local/bin/k9s \
+    /usr/local/bin/config-workspace
 
 ENV HOME=/home/pk3s \
     PATH=/opt/ansible/bin:/usr/local/bin:/usr/bin:/bin \

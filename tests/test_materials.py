@@ -53,6 +53,12 @@ class MaterialsTests(unittest.TestCase):
         self.assertEqual(locked["python-runtime"]["version"], "3.11.2-1+b1")
         self.assertEqual(locked["curl"]["version"], "7.88.1-10+deb12u15")
 
+    def test_config_workspace_runtime_requirement_is_locked(self) -> None:
+        requirements = {item["id"]: item for item in self.lock["spec"]["requirements"]}
+        self.assertEqual(requirements["linux-landlock"]["version"], "1")
+        self.assertEqual(requirements["linux-landlock"]["pinPolicy"], "minimum-supported")
+        self.assertTrue(requirements["linux-landlock"]["required"])
+
     def test_validation_reports_contract_failures(self) -> None:
         payload = {"apiVersion": "wrong", "kind": "Wrong", "metadata": {}, "spec": {"materials": "bad"}}
         errors = materials.validate_lock(payload)

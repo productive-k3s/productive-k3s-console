@@ -153,3 +153,10 @@ spec:
       source: https://github.com/docker/compose
       pinPolicy: minimum-supported
       required: true
+    - id: linux-landlock
+      type: kernel-abi
+      name: Linux Landlock ABI
+      version: "1"
+      source: https://docs.kernel.org/userspace-api/landlock.html
+      pinPolicy: minimum-supported
+      required: true

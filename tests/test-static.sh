@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 mapfile -t shell_files < <(find "${ROOT_DIR}" -path "${ROOT_DIR}/.venv" -prune -o -type f -name '*.sh' -print)
 shellcheck "${shell_files[@]}"
+cc -std=c11 -Wall -Wextra -Werror -fsyntax-only "${ROOT_DIR}/console/config-workspace.c"
 if grep -En '(^|[[:space:]/:@])latest([[:space:]@]|$)' \
   "${ROOT_DIR}/console/Dockerfile" "${ROOT_DIR}/docker-compose.yml" "${ROOT_DIR}/materials.lock.yaml"; then
   printf 'ERROR: floating latest reference found.\n' >&2
